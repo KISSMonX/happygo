@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	cluster "github.com/bsm/sarama-cluster"
 )
@@ -50,7 +51,18 @@ func main() {
 	// consume notifications
 	go func() {
 		for ntf := range consumer.Notifications() {
-			log.Printf("Rebalanced: %+v\n", ntf)
+			// The type of notification we've received, will be
+			// rebalance start, rebalance ok or error
+			fmt.Println(ntf.Type)
+
+			// The topic/partitions that are currently read by the consumer
+			fmt.Println(ntf.Current)
+
+			// The topic/partitions that were claimed in the last rebalance
+			fmt.Println(ntf.Claimed)
+
+			// The topic/partitions that were released in the last rebalance
+			fmt.Println(ntf.Released)
 		}
 	}()
 
@@ -60,11 +72,12 @@ func main() {
 	// 	case msg, ok := <-consumer.Messages():
 	// 		if ok {
 	// 			fmt.Fprintf(os.Stdout, "%s/%d/%d\t%s\t%s\n", msg.Topic, msg.Partition, msg.Offset, msg.Key, msg.Value)
-	// 			consumer.MarkOffset(msg, "") // mark message as processed
+	// 			// consumer.MarkOffset(msg, "") // mark message as processed
 	// 		}
 	// 	case <-signals:
 	// 		return
 	// 	}
+	// 	time.Sleep(time.Second)
 	// }
 
 	// consume partitions
@@ -75,16 +88,17 @@ func main() {
 				fmt.Println("没数据...")
 				return
 			}
-
 			// start a separate goroutine to consume messages
-			go func(pc cluster.PartitionConsumer) {
-				for msg := range pc.Messages() {
+			go func(pc *cluster.PartitionConsumer) {
+				p := *pc
+				for msg := range p.Messages() {
 					fmt.Fprintf(os.Stdout, "%s/%d/%d\t%s\t%s\n", msg.Topic, msg.Partition, msg.Offset, msg.Key, msg.Value)
-					consumer.MarkOffset(msg, "") // mark message as processed
+					// consumer.MarkOffset(msg, "") // mark message as processed
 				}
-			}(part)
+			}(&part)
 		case <-signals:
 			return
 		}
+		time.Sleep(time.Second)
 	}
 }
