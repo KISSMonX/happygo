@@ -13,4 +13,6 @@ func main() {
 	case false:
 		fmt.Println("false")
 	}
+
+	fmt.Println(float64(1 / 3))
 }
