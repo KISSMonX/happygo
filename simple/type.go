@@ -2,17 +2,33 @@ package main
 
 import "fmt"
 
-func False() bool {
-	return false
+type W struct {
+	Id int
+	t  *T
+}
+
+func createT() *T {
+	var t *T = &T{}
+	t.Id = 1
+	return t
+}
+
+func (w *W) setT() {
+	t := createT()
+	fmt.Println(t.Id)
+	fmt.Println("setT t地址: ", &t)
+	w.t = t
+	fmt.Println("setT t地址: ", &w.t)
+}
+
+type T struct {
+	Id   int
+	Name string
 }
 
 func main() {
-	switch False() {
-	case true:
-		fmt.Println("true")
-	case false:
-		fmt.Println("false")
-	}
+	w := W{}
+	w.setT()
 
-	fmt.Println(float64(1 / 3))
+	fmt.Println(&w.t)
 }
