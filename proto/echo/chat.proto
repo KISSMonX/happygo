@@ -1,0 +1,8 @@
+syntax = "proto3";
+package message;
+
+message Chat
+{
+	required string user    = 1;
+	required string message = 2;
+}
